@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
-	"strconv"
 
 	"github.com/soldatov-s/go-garage-profile/models"
 
@@ -31,21 +30,21 @@ func (t *ProfileV1) profileGetHandler(ec echo.Context) (err error) {
 		return nil
 	}
 
-	log := echo.GetLog(ec)
+	log := ec.GetLog()
 
-	ID, err := strconv.Atoi(ec.Param("id"))
+	ID, err := ec.GetInt64Param("id")
 	if err != nil {
 		log.Err(err).Msgf("bad request, id %s", ec.Param("id"))
-		return echo.BadRequest(ec, err)
+		return ec.BadRequest(err)
 	}
 
-	data, err := t.GetProfileByID(int64(ID))
+	data, err := t.GetProfileByID(ID)
 	if err != nil {
 		log.Err(err).Msgf("bad request, id %s", ec.Param("id"))
-		return echo.BadRequest(ec, err)
+		return ec.BadRequest(err)
 	}
 
-	return echo.OK(ec, ProfileDataResult{Body: data})
+	return ec.OK(ProfileDataResult{Body: data})
 }
 
 func (t *ProfileV1) profilePostHandler(ec echo.Context) (err error) {
@@ -65,23 +64,23 @@ func (t *ProfileV1) profilePostHandler(ec echo.Context) (err error) {
 	}
 
 	// Main code of handler
-	log := echo.GetLog(ec)
+	log := ec.GetLog()
 
 	var request models.Profile
 
 	err = ec.Bind(&request)
 	if err != nil {
 		log.Err(err).Msg("bad request")
-		return echo.BadRequest(ec, err)
+		return ec.BadRequest(err)
 	}
 
 	data, err := t.CreateProfile(&request)
 	if err != nil {
 		log.Err(err).Msgf("create data failed %+v", &request)
-		return echo.CreateFailed(ec, err)
+		return ec.CreateFailed(err)
 	}
 
-	return echo.OK(ec, ProfileDataResult{Body: data})
+	return ec.OK(ProfileDataResult{Body: data})
 }
 
 func (t *ProfileV1) profileDeleteHandler(ec echo.Context) (err error) {
@@ -101,12 +100,12 @@ func (t *ProfileV1) profileDeleteHandler(ec echo.Context) (err error) {
 		return nil
 	}
 
-	log := echo.GetLog(ec)
+	log := ec.GetLog()
 
-	ID, err := strconv.ParseInt(ec.Param("id"), 10, 64)
+	ID, err := ec.GetInt64Param("id")
 	if err != nil {
 		log.Err(err).Msgf("bad request, id %s", ec.Param("id"))
-		return echo.BadRequest(ec, err)
+		return ec.BadRequest(err)
 	}
 
 	hard := ec.QueryParam("hard")
@@ -118,10 +117,10 @@ func (t *ProfileV1) profileDeleteHandler(ec echo.Context) (err error) {
 
 	if err != nil {
 		log.Err(err).Msgf("bad request, id %s", ec.Param("id"))
-		return echo.BadRequest(ec, err)
+		return ec.BadRequest(err)
 	}
 
-	return echo.OkResult(ec)
+	return ec.OkResult()
 }
 
 func (t *ProfileV1) profilePutHandler(ec echo.Context) (err error) {
@@ -143,12 +142,12 @@ func (t *ProfileV1) profilePutHandler(ec echo.Context) (err error) {
 	}
 
 	// Main code of handler
-	log := echo.GetLog(ec)
+	log := ec.GetLog()
 
-	profileID, err := strconv.ParseInt(ec.Param("id"), 10, 64)
+	profileID, err := ec.GetInt64Param("id")
 	if err != nil {
 		log.Err(err).Msgf("bad request, id %s", ec.Param("id"))
-		return echo.BadRequest(ec, err)
+		return ec.BadRequest(err)
 	}
 
 	var bodyBytes []byte
@@ -159,17 +158,17 @@ func (t *ProfileV1) profilePutHandler(ec echo.Context) (err error) {
 
 		if err != nil {
 			log.Err(err).Msgf("data not updated, id %d", profileID)
-			return echo.BadRequest(ec, err)
+			return ec.BadRequest(err)
 		}
 	}
 
 	profileData, err := t.UpdateProfileByID(profileID, &bodyBytes)
 	if err != nil {
 		log.Err(err).Msgf("bad request, id %d, body %s", profileID, string(bodyBytes))
-		return echo.CreateFailed(ec, err)
+		return ec.CreateFailed(err)
 	}
 
-	return echo.OK(ec, ProfileDataResult{Body: profileData})
+	return ec.OK(ProfileDataResult{Body: profileData})
 }
 
 func (u *ProfileV1) profileSearchPostHandler(ec echo.Context) (err error) {
@@ -189,20 +188,20 @@ func (u *ProfileV1) profileSearchPostHandler(ec echo.Context) (err error) {
 	}
 
 	// Main code of handler
-	log := echo.GetLog(ec)
+	log := ec.GetLog()
 	var req ArrayOfMapInterface
 
 	err = ec.Bind(&req)
 	if err != nil {
 		log.Err(err).Msg("bad request")
-		return echo.BadRequest(ec, err)
+		return ec.BadRequest(err)
 	}
 
 	foundUsersData, err := u.getUserDataByUserData(&req)
 	if err != nil {
 		log.Err(err).Msgf("not found data, request %+v", req)
-		return echo.NotFound(ec, err)
+		return ec.NotFound(err)
 	}
 
-	return echo.OK(ec, ProfileDataResult{Body: foundUsersData})
+	return ec.OK(ProfileDataResult{Body: foundUsersData})
 }
