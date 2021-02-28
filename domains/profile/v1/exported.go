@@ -43,6 +43,8 @@ func Registrate(ctx context.Context) (context.Context, error) {
 	grProtect.GET("/profile/:id", echo.Handler(t.profileGetHandler))
 	grProtect.POST("/profile", echo.Handler(t.profilePostHandler))
 	grProtect.DELETE("/profile/:id", echo.Handler(t.profileDeleteHandler))
+	grProtect.PUT("/profiles/:id", echo.Handler(t.profilePutHandler))
+	grProtect.POST("/users/search", echo.Handler(t.profileSearchPostHandler))
 
 	return domains.RegistrateByName(ctx, DomainName, t), nil
 }

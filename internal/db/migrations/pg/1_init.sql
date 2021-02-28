@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE IF NOT EXISTS production.profile (
+CREATE TABLE IF NOT EXISTS production.profiles (
     id INTEGER PRIMARY KEY,
     user_first_name character varying(255) DEFAULT '',
     user_middle_name character varying(255) DEFAULT '',
@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS production.profile (
 );
 
 -- +goose Down
-DROP TABLE IF EXISTS production.profile;
+DROP TABLE IF EXISTS production.profiles;
