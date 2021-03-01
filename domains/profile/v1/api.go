@@ -1,4 +1,4 @@
-package testv1
+package profilev1
 
 import (
 	"errors"

@@ -1,4 +1,4 @@
-package testv1
+package profilev1
 
 import (
 	"github.com/soldatov-s/go-garage-profile/models"
