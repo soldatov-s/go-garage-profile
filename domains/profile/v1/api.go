@@ -1,31 +1,26 @@
 package profilev1
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 
 	"github.com/soldatov-s/go-garage-profile/models"
-
 	"github.com/soldatov-s/go-garage/providers/httpsrv"
 	"github.com/soldatov-s/go-garage/providers/httpsrv/echo"
-	echoSwagger "github.com/soldatov-s/go-swagger/echo-swagger"
 )
 
 func (t *ProfileV1) profileGetHandler(ec echo.Context) (err error) {
 	// Swagger
-	if echoSwagger.IsBuildingSwagger(ec) {
-		err = errors.New("error")
-		echoSwagger.AddToSwagger(ec).
+	if ec.IsBuildingSwagger() {
+		ec.AddToSwagger().
 			SetProduces("application/json").
-			SetDescription("This handler getting data for requested ID").
-			SetSummary("Get data by ID").
+			SetDescription("This handler getting profile data for requested ID").
+			SetSummary("Get profile data by ID").
 			AddInPathParameter("id", "ID", reflect.Int).
-			AddResponse(http.StatusOK, "Data", ProfileDataResult{Body: models.Profile{}}).
-			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.BadRequest(err)).
-			AddResponse(http.StatusNotFound, "NOT FOUND DATA", httpsrv.NotFound(err))
+			AddResponse(http.StatusOK, "Profile Data", ProfileDataResult{Body: models.Profile{}}).
+			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.ErrorAnsw{}).
+			AddResponse(http.StatusNotFound, "NOT FOUND DATA", httpsrv.ErrorAnsw{})
 
 		return nil
 	}
@@ -49,16 +44,15 @@ func (t *ProfileV1) profileGetHandler(ec echo.Context) (err error) {
 
 func (t *ProfileV1) profilePostHandler(ec echo.Context) (err error) {
 	// Swagger
-	if echoSwagger.IsBuildingSwagger(ec) {
-		err = errors.New("error")
-		echoSwagger.AddToSwagger(ec).
+	if ec.IsBuildingSwagger() {
+		ec.AddToSwagger().
 			SetProduces("application/json").
 			SetDescription("This handler create new data").
 			SetSummary("Create Data Handler").
 			AddInBodyParameter("data", "Data", models.Profile{}, true).
 			AddResponse(http.StatusOK, "Data", &ProfileDataResult{Body: models.Profile{}}).
-			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.BadRequest(err)).
-			AddResponse(http.StatusConflict, "CREATE DATA FAILED", httpsrv.CreateFailed(err))
+			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.ErrorAnsw{}).
+			AddResponse(http.StatusConflict, "CREATE DATA FAILED", httpsrv.ErrorAnsw{})
 
 		return nil
 	}
@@ -85,17 +79,16 @@ func (t *ProfileV1) profilePostHandler(ec echo.Context) (err error) {
 
 func (t *ProfileV1) profileDeleteHandler(ec echo.Context) (err error) {
 	// Swagger
-	if echoSwagger.IsBuildingSwagger(ec) {
-		err = errors.New("error")
-		echoSwagger.AddToSwagger(ec).
+	if ec.IsBuildingSwagger() {
+		ec.AddToSwagger().
 			SetProduces("application/json").
 			SetDescription("This handler deletes data for requested ID").
 			SetSummary("Delete data by ID").
 			AddInPathParameter("id", "ID", reflect.Int).
-			AddInQueryParameter("hard", "Hard delete user, if equal true, delete hard", reflect.Bool, false).
+			AddInQueryParameter("hard", "Hard delete profile, if equal true, delete hard", reflect.Bool, false).
 			AddResponse(http.StatusOK, "OK", httpsrv.OkResult()).
-			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.BadRequest(err)).
-			AddResponse(http.StatusNotFound, "NOT FOUND DATA", httpsrv.NotFound(err))
+			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.ErrorAnsw{}).
+			AddResponse(http.StatusNotFound, "NOT FOUND DATA", httpsrv.ErrorAnsw{})
 
 		return nil
 	}
@@ -125,18 +118,17 @@ func (t *ProfileV1) profileDeleteHandler(ec echo.Context) (err error) {
 
 func (t *ProfileV1) profilePutHandler(ec echo.Context) (err error) {
 	// Swagger
-	if echoSwagger.IsBuildingSwagger(ec) {
-		err = fmt.Errorf("error")
-		echoSwagger.AddToSwagger(ec).
+	if ec.IsBuildingSwagger() {
+		ec.AddToSwagger().
 			SetProduces("application/json").
 			SetDescription("Update User Handler").
-			SetSummary("This handler update user data by user_id").
-			AddInBodyParameter("user_data", "User data", &models.Profile{}, true).
+			SetSummary("This handler update Profile data by user_id").
+			AddInBodyParameter("profile_data", "Profile data", &models.Profile{}, true).
 			AddInPathParameter("id", "User id", reflect.Int64).
-			AddResponse(http.StatusOK, "User Data", &ProfileDataResult{Body: models.Profile{}}).
-			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.BadRequest(err)).
-			AddResponse(http.StatusConflict, "DATA NOT UPDATED", httpsrv.NotUpdated(err)).
-			AddResponse(http.StatusNotFound, "NOT FOUND DATA", httpsrv.NotFound(err))
+			AddResponse(http.StatusOK, "Profile Data", &ProfileDataResult{Body: models.Profile{}}).
+			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.ErrorAnsw{}).
+			AddResponse(http.StatusConflict, "DATA NOT UPDATED", httpsrv.ErrorAnsw{}).
+			AddResponse(http.StatusNotFound, "NOT FOUND DATA", httpsrv.ErrorAnsw{})
 
 		return nil
 	}
@@ -173,14 +165,13 @@ func (t *ProfileV1) profilePutHandler(ec echo.Context) (err error) {
 
 func (u *ProfileV1) profileSearchPostHandler(ec echo.Context) (err error) {
 	// Swagger
-	if echoSwagger.IsBuildingSwagger(ec) {
-		err = fmt.Errorf("error")
-		echoSwagger.AddToSwagger(ec).
+	if ec.IsBuildingSwagger() {
+		ec.AddToSwagger().
 			SetProduces("application/json").
 			SetDescription("Find profile").
 			SetSummary("This handler find profile data by any field in Profile data struct. Can be multiple structs in request. Search by meta-fields not work!").
-			AddInBodyParameter("users_data", "Users data", &ArrayOfProfileData{}, true).
-			AddResponse(http.StatusOK, "Users data", &ProfilesDataResult{Body: ArrayOfProfileData{}}).
+			AddInBodyParameter("profile_data", "Profile data", &ArrayOfProfileData{}, true).
+			AddResponse(http.StatusOK, "Profile data", &ProfilesDataResult{Body: ArrayOfProfileData{}}).
 			AddResponse(http.StatusBadRequest, "BAD REQUEST", httpsrv.BadRequest(err)).
 			AddResponse(http.StatusNotFound, "NOT FOUND DATA", httpsrv.NotFound(err))
 

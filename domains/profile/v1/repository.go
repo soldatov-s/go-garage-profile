@@ -11,7 +11,6 @@ import (
 	"github.com/soldatov-s/go-garage/crypto/sign"
 	"github.com/soldatov-s/go-garage/providers/db"
 	"github.com/soldatov-s/go-garage/types"
-	"github.com/soldatov-s/go-garage/utils"
 	"github.com/soldatov-s/go-garage/x/sql"
 )
 
@@ -35,35 +34,7 @@ func (t *ProfileV1) HardDeleteProfileByID(id int64) (err error) {
 }
 
 func (t *ProfileV1) SoftDeleteProfileByID(id int64) (err error) {
-	data, err := t.GetProfileByID(id)
-	if err != nil {
-		return err
-	}
-
-	if data.DeletedAt.Valid {
-		return nil
-	}
-
-	data.DeletedAt.Timestamp()
-
-	query := make([]string, 0, len(data.SQLParamsRequest()))
-	for _, param := range data.SQLParamsRequest() {
-		query = append(query, param+"=:"+param)
-	}
-
-	if t.db.Conn == nil {
-		return db.ErrDBConnNotEstablished
-	}
-
-	_, err = t.db.Conn.NamedExec(
-		t.db.Conn.Rebind(utils.JoinStrings(" ", "UPDATE", profilesTable, "SET", strings.Join(query, ", "), "WHERE id=:id")),
-		data)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return sql.SoftDeleteByID(t.db.Conn, profilesTable, id)
 }
 
 func (t *ProfileV1) CreateProfile(data *models.Profile) (*models.Profile, error) {
